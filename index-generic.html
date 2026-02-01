@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Meta Ads - Configurable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --background: #ffffff;
+            --foreground: #000000;
+            --muted: #f5f5f5;
+            --muted-foreground: #666666;
+            --border: #000000;
+        }
+
+        * {
+            border-radius: 0 !important;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+        }
+
+        .badge {
+            background: white;
+            border: 1px solid black;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-dark {
+            background: black;
+            color: white;
+            border: 1px solid black;
+        }
+
+        .text-muted-foreground {
+            color: var(--muted-foreground);
+        }
+
+        input,
+        select {
+            border: 1px solid black;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid black;
+        }
+
+        .btn {
+            background: black;
+            color: white;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #333;
+        }
+
+        .btn-outline {
+            background: white;
+            color: black;
+            border: 2px solid black;
+        }
+
+        .btn-outline:hover {
+            background: black;
+            color: white;
+        }
+
+        #configPanel {
+            transition: all 0.3s ease;
+        }
+
+        #analysisResults {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b-2 border-black">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-black flex items-center justify-center text-white font-black text-xl">A</div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight">ANALIZADOR META ADS</h1>
+                    <p class="text-xs text-muted-foreground">Versión Configurable - Cualquier Cliente</p>
+                </div>
+            </div>
+            <button id="resetBtn" class="btn-outline text-xs px-3 py-2" style="display:none;" onclick="resetAnalyzer()">
+                Nueva Configuración
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- Configuration Panel -->
+        <div id="configPanel" class="space-y-6">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black mb-2">Configurar Análisis</h2>
+                <p class="text-muted-foreground">Define los parámetros para tu análisis comparativo</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Period 1 Configuration -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">1</span>
+                        Período 1 (Antes)
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Nombre del Período</label>
+                            <input type="text" id="period1Name" value="Período 1" class="w-full"
+                                placeholder="Ej: Diciembre, Antes, Agencia Anterior">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Fecha Inicio</label>
+                                <input type="date" id="period1Start" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Fecha Fin</label>
+                                <input type="date" id="period1End" class="w-full">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Keywords para excluir (Opcional)</label>
+                            <input type="text" id="period1ExcludeKeywords" class="w-full"
+                                placeholder="Ej: arizon, nuevo (separar con coma)">
+                            <p class="text-xs text-muted-foreground mt-1">Anuncios con estas palabras NO se incluirán en
+                                P1</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Period 2 Configuration -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">2</span>
+                        Período 2 (Después)
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Nombre del Período</label>
+                            <input type="text" id="period2Name" value="Período 2" class="w-full"
+                                placeholder="Ej: Enero, Después, Nueva Estrategia">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Fecha Inicio</label>
+                                <input type="date" id="period2Start" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold mb-1">Fecha Fin</label>
+                                <input type="date" id="period2End" class="w-full">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Keywords para incluir (Opcional)</label>
+                            <input type="text" id="period2IncludeKeywords" class="w-full"
+                                placeholder="Ej: arizon, lista, nuevo (separar con coma)">
+                            <p class="text-xs text-muted-foreground mt-1">Anuncios con estas palabras = P2 (aunque
+                                fechas no coincidan)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benchmarks -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">3</span>
+                        Benchmarks de Industria
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">CTR Mínimo (%)</label>
+                            <input type="number" id="benchCTR" value="1.4" step="0.1" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">CPM Máximo ($)</label>
+                            <input type="number" id="benchCPM" value="10.88" step="0.1" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">CPL Máximo ($)</label>
+                            <input type="number" id="benchCPL" value="15" step="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold mb-1">Frecuencia Máx</label>
+                            <input type="number" id="benchFreq" value="1.5" step="0.1" class="w-full">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-xs font-semibold mb-1">Industria/Sector</label>
+                        <select id="industrySector" class="w-full" onchange="toggleCustomSector()">
+                            <option value="ecommerce">E-commerce / Retail</option>
+                            <option value="electronics">Electrónicos</option>
+                            <option value="services">Servicios</option>
+                            <option value="realestate">Inmobiliaria</option>
+                            <option value="education">Educación</option>
+                            <option value="health">Salud</option>
+                            <option value="automotive">Automotriz</option>
+                            <option value="food">Alimentos / Restaurantes</option>
+                            <option value="beauty">Belleza / Cosmética</option>
+                            <option value="fitness">Fitness / Gimnasios</option>
+                            <option value="travel">Viajes / Turismo</option>
+                            <option value="finance">Finanzas / Seguros</option>
+                            <option value="custom">✏️ Personalizado...</option>
+                        </select>
+                        <input type="text" id="customSector" class="w-full mt-2 hidden"
+                            placeholder="Escribe tu sector personalizado">
+                    </div>
+                </div>
+
+                <!-- Client Info -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">4</span>
+                        Información del Cliente
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Nombre del Cliente/Empresa</label>
+                            <input type="text" id="clientName" value="" class="w-full"
+                                placeholder="Ej: Mundo Electrónica, Tienda ABC">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Objetivo Principal</label>
+                            <p class="text-xs text-muted-foreground border border-dashed border-black p-2">
+                                📊 Se detectará automáticamente del CSV (columna "Tipo de resultado")
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-1">Presupuesto Mensual ($)</label>
+                            <input type="number" id="monthlyBudget" value="2000" step="100" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Filters (Collapsible) -->
+        <details class="card p-6 mt-6">
+            <summary class="font-bold text-lg cursor-pointer flex items-center gap-2">
+                <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">⚙️</span>
+                Configuración Avanzada
+                <span class="text-sm text-muted-foreground ml-2">(click para expandir)</span>
+            </summary>
+
+            <div class="mt-6 space-y-6">
+                <!-- Comparison Mode -->
+                <div class="border-2 border-black p-4">
+                    <h4 class="font-bold mb-3">📊 Modo de Comparación</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <label class="flex items-center gap-2 p-2 border border-black cursor-pointer hover:bg-gray-100">
+                            <input type="radio" name="comparisonMode" value="dates" checked> Por Fechas
+                        </label>
+                        <label class="flex items-center gap-2 p-2 border border-black cursor-pointer hover:bg-gray-100">
+                            <input type="radio" name="comparisonMode" value="campaigns"> Por Campaña
+                        </label>
+                        <label class="flex items-center gap-2 p-2 border border-black cursor-pointer hover:bg-gray-100">
+                            <input type="radio" name="comparisonMode" value="keywords"> Por Keywords
+                        </label>
+                        <label class="flex items-center gap-2 p-2 border border-black cursor-pointer hover:bg-gray-100">
+                            <input type="radio" name="comparisonMode" value="demographics"> Por Demografía
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Data Filters -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border border-black p-4">
+                        <h4 class="font-bold mb-3 text-sm">🎯 Estado de Entrega</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" id="filterActive" checked> Active
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" id="filterNotDelivering" checked> Not Delivering
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border border-black p-4">
+                        <h4 class="font-bold mb-3 text-sm">💰 Filtro de Gasto</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="text-xs">Gasto mínimo ($)</label>
+                                <input type="number" id="minSpend" value="0" step="1" class="w-full">
+                            </div>
+                            <p class="text-xs text-muted-foreground">Excluir ads con poco gasto</p>
+                        </div>
+                    </div>
+
+                    <div class="border border-black p-4">
+                        <h4 class="font-bold mb-3 text-sm">🔍 Filtro de Nombre</h4>
+                        <div class="space-y-2">
+                            <input type="text" id="filterNameContains" placeholder="Contiene..." class="w-full text-sm">
+                            <input type="text" id="filterNameExcludes" placeholder="Excluir..." class="w-full text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demographics Filter -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-black p-4">
+                        <h4 class="font-bold mb-3 text-sm">👤 Filtrar por Edad</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="18-24" checked>
+                                18-24</label>
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="25-34" checked>
+                                25-34</label>
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="35-44" checked>
+                                35-44</label>
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="45-54" checked>
+                                45-54</label>
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="55-64" checked>
+                                55-64</label>
+                            <label class="text-xs"><input type="checkbox" class="ageFilter" value="65+" checked>
+                                65+</label>
+                        </div>
+                    </div>
+
+                    <div class="border border-black p-4">
+                        <h4 class="font-bold mb-3 text-sm">⚧ Filtrar por Sexo</h4>
+                        <div class="flex gap-4">
+                            <label class="text-sm"><input type="checkbox" id="filterMale" checked> Hombres</label>
+                            <label class="text-sm"><input type="checkbox" id="filterFemale" checked> Mujeres</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="border-2 border-black p-4 bg-gray-50">
+                    <h4 class="font-bold mb-3">⚡ Presets Rápidos</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="applyPreset('monthVsMonth')" class="btn-secondary text-xs">📅 Mes vs
+                            Mes</button>
+                        <button onclick="applyPreset('weekVsWeek')" class="btn-secondary text-xs">🔄 Semana vs
+                            Semana</button>
+                        <button onclick="applyPreset('bestPerformers')" class="btn-secondary text-xs">🎯 Best
+                            Performers</button>
+                        <button onclick="applyPreset('problemAds')" class="btn-secondary text-xs">📉 Problem
+                            Ads</button>
+                        <button onclick="applyPreset('resetFilters')" class="btn-secondary text-xs">🔁 Reset
+                            Filtros</button>
+                    </div>
+                </div>
+
+                <!-- Performance Thresholds -->
+                <div class="border border-black p-4">
+                    <h4 class="font-bold mb-3 text-sm">🎨 Umbrales de Performance (para colores)</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <label>CTR Bueno (≥%)</label>
+                            <input type="number" id="thresholdCTRGood" value="2" step="0.1" class="w-full">
+                        </div>
+                        <div>
+                            <label>CPM Bueno (≤$)</label>
+                            <input type="number" id="thresholdCPMGood" value="8" step="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <label>CPL Bueno (≤$)</label>
+                            <input type="number" id="thresholdCPLGood" value="10" step="0.5" class="w-full">
+                        </div>
+                        <div>
+                            <label>Freq Buena (≤)</label>
+                            <input type="number" id="thresholdFreqGood" value="1.5" step="0.1" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <!-- CSV Upload -->
+        <div class="card p-6">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="w-6 h-6 bg-black text-white flex items-center justify-center text-xs">5</span>
+                Subir CSV de Meta Ads
+            </h3>
+            <div class="border-2 border-dashed border-black p-8 text-center">
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
+                <label for="csvFile" class="cursor-pointer">
+                    <div class="text-4xl mb-2">📊</div>
+                    <p class="font-bold">Arrastra o haz clic para subir CSV</p>
+                    <p class="text-sm text-muted-foreground">Exportado desde Meta Ads Manager</p>
+                </label>
+            </div>
+            <div id="fileInfo" class="mt-4 hidden">
+                <p class="text-sm"><strong>Archivo:</strong> <span id="fileName"></span></p>
+                <p class="text-sm"><strong>Filas:</strong> <span id="fileRows"></span></p>
+            </div>
+        </div>
+
+        <!-- Start Analysis Button -->
+        <div class="text-center">
+            <button id="startAnalysis" class="btn text-lg px-12 py-4" disabled>
+                Iniciar Análisis Comparativo
+            </button>
+            <p id="configError" class="text-sm mt-2 text-black hidden"></p>
+        </div>
+        </div>
+
+        <!-- Analysis Results (Hidden until analysis runs) -->
+        <div id="analysisResults" class="space-y-6">
+            <!-- Header with config summary -->
+            <div class="card p-4 bg-black text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-xs opacity-70">Análisis Comparativo</span>
+                        <h2 class="font-black text-xl"><span id="resultPeriod1">P1</span> vs <span
+                                id="resultPeriod2">P2</span></h2>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs opacity-70">Fecha Pivot</span>
+                        <p class="font-bold" id="resultCutoff">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Summary -->
+            <div id="executiveSummary" class="card p-6"></div>
+
+            <!-- Auto-Diagnosis -->
+            <div id="autoDiagnosis" class="card p-6"></div>
+
+            <!-- Metrics Comparison -->
+            <div id="metricsComparison" class="card p-6"></div>
+
+            <!-- Period Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="period1Card" class="card p-6"></div>
+                <div id="period2Card" class="card p-6"></div>
+            </div>
+
+            <!-- Deep Metrics Table -->
+            <div id="deepMetrics" class="card p-6"></div>
+
+            <!-- Strengths Analysis -->
+            <div id="strengthsAnalysis" class="card p-6"></div>
+
+            <!-- Result Type Breakdown -->
+            <div id="resultTypeBreakdown" class="card p-6"></div>
+
+            <!-- Audience Insights -->
+            <div id="audienceInsights" class="card p-6"></div>
+
+            <!-- Top Ads -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="topAdsPeriod1" class="card p-6"></div>
+                <div id="topAdsPeriod2" class="card p-6"></div>
+            </div>
+
+            <!-- Benchmark Compliance -->
+            <div id="benchmarkCompliance" class="card p-6"></div>
+
+            <!-- Strategic Conclusion -->
+            <div id="strategicConclusion" class="card p-6"></div>
+
+            <!-- Demographics Chart -->
+            <div class="card p-6">
+                <h3 class="font-bold text-lg mb-4">Gasto por Demografía</h3>
+                <div style="height: 400px;">
+                    <canvas id="demographicsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="border-t border-black mt-12 py-6 text-center text-sm text-muted-foreground">
+        Analizador Meta Ads • Versión Configurable
+    </footer>
+
+    <script src="analyzer-generic.js"></script>
+</body>
+
+</html>

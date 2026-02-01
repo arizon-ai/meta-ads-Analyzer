@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arizon.ai | Deep Data Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"Roboto Mono"', 'monospace'],
+                    },
+                    colors: {
+                        cyber: {
+                            black: '#0f172a',
+                            white: '#ffffff',
+                            gray: '#f8fafc',
+                            green: '#10b981', 
+                            red: '#ef4444',   
+                            blue: '#3b82f6',  
+                            yellow: '#eab308',
+                            purple: '#8b5cf6',
+                            text: '#1e293b',   
+                            subtext: '#475569' 
+                        }
+                    },
+                    boxShadow: {
+                        'hard': '4px 4px 0px 0px #0f172a',
+                        'hard-sm': '2px 2px 0px 0px #0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        
+        .cyber-card {
+            background: white;
+            border: 2px solid #0f172a;
+            box-shadow: 4px 4px 0px 0px #0f172a;
+            transition: transform 0.1s;
+        }
+        
+        .cyber-card:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 6px 6px 0px 0px #0f172a;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 24px;
+            border: 2px solid #0f172a;
+            background: #f3f4f6;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6 md:p-12 antialiased">
+
+    <!-- Header -->
+    <nav class="max-w-6xl mx-auto mb-12 border-b-4 border-cyber-black pb-6 flex justify-between items-end bg-white/95 backdrop-blur p-6 rounded-t-xl shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-cyber-black text-white flex items-center justify-center font-mono text-2xl font-bold rounded-lg">A</div>
+            <div>
+                <h1 class="text-3xl font-black tracking-tighter uppercase leading-none text-cyber-black">Arizon<span class="text-cyber-green">.ai</span></h1>
+                <p class="font-bold text-xs tracking-widest text-cyber-subtext uppercase">Technical Data Unit</p>
+            </div>
+        </div>
+        <div class="text-right hidden md:block">
+            <p class="font-bold text-[11px] uppercase text-cyber-subtext mb-1">Fuente de Datos</p>
+            <div class="inline-block bg-cyber-blue text-white border-2 border-cyber-black px-3 py-1 font-bold text-sm uppercase rounded">
+                Diciembre-vs-Enero (1).csv
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto space-y-12">
+
+        <!-- Intro -->
+        <div class="border-l-8 border-cyber-black pl-6 py-4 bg-white rounded-r-lg shadow-sm border-y border-r border-gray-100">
+            <h2 class="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-2 text-cyber-black">
+                Auditoría Técnica <br>
+                <span class="text-cyber-green">Evolutiva</span>
+            </h2>
+            <p class="font-medium text-lg text-cyber-text max-w-2xl leading-relaxed mt-4">
+                Análisis forense de <strong>1,758 registros</strong>. Contrastando la calidad del tráfico antes y después del corte de gestión (17 Ene) y revelando oportunidades ocultas de escalado.
+            </p>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- BLOQUE 1: ANÁLISIS EVOLUTIVO (NUEVO) -->
+        <!-- ========================================= -->
+        <div class="cyber-card p-8 border-t-8 border-cyber-purple">
+             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <h3 class="font-black text-2xl uppercase tracking-tighter flex items-center gap-3 text-cyber-black">
+                    <span class="w-4 h-8 bg-cyber-purple border-2 border-cyber-black rounded-sm"></span>
+                    Evolución: De Vistas a Ventas
+                </h3>
+                <span class="font-mono text-[10px] font-bold bg-purple-50 px-4 py-2 border-2 border-cyber-purple uppercase rounded text-cyber-purple">
+                    Pivot Estratégico 17 Enero
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+                <!-- Vertical Line for Desktop -->
+                <div class="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 border-l border-dashed border-gray-300 transform -translate-x-1/2"></div>
+                
+                <!-- Strategy 1 (Previa) -->
+                <div class="relative pr-4">
+                    <div class="inline-block bg-gray-100 text-gray-500 font-bold text-xs px-3 py-1 mb-4 border border-gray-300 rounded shadow-sm">
+                        FASE 1: DIC - 16 ENE
+                    </div>
+                    <h4 class="text-xl font-black text-gray-400 mb-2 uppercase">Estrategia de Visualización</h4>
+                    <p class="text-sm text-gray-500 font-medium mb-6">
+                        Objetivo centrado en volumen masivo y métricas de vanidad (likes, reproducciones) sin cualificación de cliente.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                            <p class="text-[10px] font-mono text-gray-400 uppercase font-bold">Tipo Resultado</p>
+                            <p class="font-bold text-gray-500 text-sm">Interacción / ThruPlay</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded border border-gray-200">
+                            <p class="text-[10px] font-mono text-gray-400 uppercase font-bold">Gasto Histórico</p>
+                            <p class="font-bold text-gray-500 text-sm">$3,510</p>
+                        </div>
+                    </div>
+                    
+                    <!-- KPI Box -->
+                    <div class="flex items-center justify-between bg-gray-50 p-3 border-l-4 border-gray-400">
+                        <span class="text-xs font-bold text-gray-400">RESULTADOS</span>
+                        <span class="font-mono font-bold text-gray-600">991,000 (Vistas)</span>
+                    </div>
+                    <p class="mt-2 text-[10px] text-gray-400 italic text-right">CPR: $0.002 (Baja Calidad)</p>
+                </div>
+
+                <!-- Strategy 2 (Arizon) -->
+                <div class="relative pl-0 lg:pl-4">
+                     <div class="inline-block bg-cyber-black text-white font-bold text-xs px-3 py-1 mb-4 border border-black rounded shadow-sm">
+                        FASE 2: 17 ENE - PRESENTE
+                    </div>
+                    <h4 class="text-xl font-black text-cyber-black mb-2 uppercase">Estrategia de Conversación</h4>
+                    <p class="text-sm text-cyber-text font-medium mb-6">
+                        Enfoque quirúrgico en usuarios dispuestos a iniciar chat. Calidad sobre cantidad.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="bg-blue-50 p-4 rounded border border-cyber-blue shadow-sm">
+                            <p class="text-[10px] font-mono text-cyber-blue uppercase font-bold">Tipo Resultado</p>
+                            <p class="font-black text-cyber-black text-sm">Mensajes Iniciados</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded border border-cyber-green shadow-sm">
+                            <p class="text-[10px] font-mono text-cyber-green uppercase font-bold">Gasto Arizon</p>
+                            <p class="font-black text-cyber-black text-sm">$916</p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Box -->
+                    <div class="flex items-center justify-between bg-cyber-black text-white p-3 border-l-4 border-cyber-green shadow-hard-sm">
+                        <span class="text-xs font-bold text-cyber-green">RESULTADOS</span>
+                        <span class="font-mono font-bold">3,185 (Chats Reales)</span>
+                    </div>
+                    <p class="mt-2 text-[10px] text-cyber-text font-bold italic text-right">CPR: $0.29 (Alta Intención)</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-purple-50 border border-purple-200 text-xs text-cyber-text font-medium rounded text-center">
+                El 96% del presupuesto actual se invierte exclusivamente en generar <strong>Clientes Potenciales</strong>, abandonando el gasto en "Likes".
+            </div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- BLOQUE 2: CALIDAD CREATIVA (CTR) -->
+        <!-- ========================================= -->
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- CTR Comparison -->
+            <div class="cyber-card p-8">
+                <h3 class="font-black text-xl uppercase mb-6 flex items-center gap-3">
+                    <span class="w-4 h-8 bg-cyber-green border-2 border-black rounded-sm"></span>
+                    Calidad Creativa (CTR)
+                </h3>
+                
+                <div class="space-y-8 mt-8">
+                    <!-- Bar 1 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-mono font-bold mb-2">
+                            <span class="text-gray-500">DIC - 16 ENE</span>
+                            <span class="text-gray-500">3.49%</span>
+                        </div>
+                        <div class="bar-container rounded-sm">
+                            <div class="bar-fill bg-gray-400" style="width: 72%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bar 2 -->
+                    <div>
+                        <div class="flex justify-between text-xs font-mono font-bold mb-2">
+                            <span class="text-white bg-cyber-green px-1 rounded-sm border border-cyber-green font-bold">17 ENE - HOY</span>
+                            <span class="text-cyber-black font-black">4.80%</span>
+                        </div>
+                        <div class="bar-container shadow-hard-sm rounded-sm">
+                            <div class="bar-fill bg-cyber-green text-black border-r-2 border-black" style="width: 100%">+37% MEJORA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-green-50 border-l-4 border-cyber-green text-xs font-medium text-gray-700 leading-relaxed rounded-r">
+                    <strong>INSIGHT:</strong> El incremento del CTR al <strong>4.80%</strong> indica que los creativos actuales (vídeos y carruseles) son significativamente más atractivos para la audiencia, reduciendo el desperdicio de impresiones.
+                </div>
+            </div>
+
+            <!-- Analysis Keywords -->
+            <div class="cyber-card p-8 bg-gray-50 border-2 border-cyber-black">
+                <div class="flex justify-between items-center mb-6 border-b-2 border-gray-200 pb-4">
+                    <h3 class="font-black text-xl uppercase text-cyber-black">Minería Semántica</h3>
+                    <span class="bg-white text-cyber-black px-3 py-1 rounded-full text-[10px] font-bold border-2 border-cyber-black uppercase shadow-sm">Top Palabras</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Keyword 1 -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 text-center hover:border-cyber-green transition-colors cursor-default group">
+                        <p class="text-[9px] uppercase font-bold text-gray-400 mb-2 group-hover:text-cyber-green">Mejor Costo</p>
+                        <p class="text-lg font-black text-cyber-black">"REDMI"</p>
+                        <div class="mt-2 text-xs font-mono bg-gray-50 rounded p-1">
+                            <span class="block text-cyber-green font-bold">$0.27 CPR</span>
+                        </div>
+                    </div>
+                    <!-- Keyword 2 -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 text-center hover:border-cyber-blue transition-colors cursor-default group">
+                        <p class="text-[9px] uppercase font-bold text-gray-400 mb-2 group-hover:text-cyber-blue">Mayor Atracción</p>
+                        <p class="text-lg font-black text-cyber-black">"LISTA"</p>
+                        <div class="mt-2 text-xs font-mono bg-gray-50 rounded p-1">
+                            <span class="block text-cyber-blue font-bold">6.90% CTR</span>
+                        </div>
+                    </div>
+                    <!-- Keyword 3 -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 text-center hover:border-cyber-green transition-colors cursor-default group">
+                        <p class="text-[9px] uppercase font-bold text-gray-400 mb-2 group-hover:text-cyber-green">Eficiencia</p>
+                        <p class="text-lg font-black text-cyber-black">"INFINIX"</p>
+                        <div class="mt-2 text-xs font-mono bg-gray-50 rounded p-1">
+                            <span class="block text-cyber-green font-bold">$0.25 CPR</span>
+                        </div>
+                    </div>
+                    <!-- Keyword 4 -->
+                    <div class="bg-white p-4 rounded-lg border-2 border-gray-200 text-center hover:border-cyber-red transition-colors cursor-default group">
+                        <p class="text-[9px] uppercase font-bold text-gray-400 mb-2 group-hover:text-cyber-red">Alerta</p>
+                        <p class="text-lg font-black text-cyber-black">"CARRUSEL"</p>
+                        <div class="mt-2 text-xs font-mono bg-gray-50 rounded p-1">
+                            <span class="block text-cyber-red font-bold">$0.42 CPR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- BLOQUE 3: MATRIZ DE OPORTUNIDAD (SEGMENTACIÓN) -->
+        <!-- ========================================= -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Gold Mines -->
+            <div class="cyber-card p-8 bg-white border-l-4 border-l-cyber-yellow">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="font-black text-lg uppercase flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-yellow" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/></svg>
+                        Mina de Oro (Escalar)
+                    </h3>
+                    <span class="text-[9px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">BAJO COSTO / ALTO IMPACTO</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                        <span class="font-bold text-sm text-cyber-black">HOMBRES 18-24</span>
+                        <div class="text-right">
+                            <span class="block font-mono font-bold text-cyber-green text-sm">$0.22</span>
+                            <span class="text-[9px] text-gray-500 uppercase">Costo por Lead</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                        <span class="font-bold text-sm text-cyber-black">HOMBRES 35-44</span>
+                        <div class="text-right">
+                            <span class="block font-mono font-bold text-cyber-green text-sm">$0.24</span>
+                            <span class="text-[9px] text-gray-500 uppercase">Costo por Lead</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-4 text-xs font-medium text-cyber-text">
+                    <strong>Acción:</strong> Segmentos masculinos jóvenes y de edad media muestran la mayor eficiencia. Se recomienda aumentar el presupuesto en estos grupos un 15-20%.
+                </p>
+            </div>
+
+            <!-- Money Pits -->
+            <div class="cyber-card p-8 bg-white border-l-4 border-l-cyber-red">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="font-black text-lg uppercase flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyber-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Fugas de Capital (Pausar)
+                    </h3>
+                    <span class="text-[9px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded">ALTO COSTO / BAJO RETORNO</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                        <span class="font-bold text-sm text-cyber-black">MUJERES 65+</span>
+                        <div class="text-right">
+                            <span class="block font-mono font-bold text-cyber-red text-sm">$0.45</span>
+                            <span class="text-[9px] text-gray-500 uppercase">Costo por Lead (+60%)</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center p-3 border-b border-gray-100">
+                        <span class="font-bold text-sm text-cyber-black">LIFEPHONE (AD SET X)</span>
+                        <div class="text-right">
+                            <span class="block font-mono font-bold text-cyber-red text-sm">$0.00</span>
+                            <span class="text-[9px] text-gray-500 uppercase">Cero Resultados (Gasto $8)</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-4 text-xs font-medium text-cyber-text">
+                    <strong>Acción:</strong> Pausar o excluir explícitamente el segmento +65 años y revisar creativos de Lifephone que no están convirtiendo.
+                </p>
+            </div>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- BLOQUE 4: TABLA DE CREATIVOS (EXISTENTE) -->
+        <!-- ========================================= -->
+        <div class="cyber-card p-0 overflow-hidden rounded-xl shadow-hard">
+            <div class="bg-cyber-black text-white p-5 flex justify-between items-center">
+                <h3 class="font-bold text-sm uppercase tracking-wide flex items-center gap-2">
+                    <span class="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></span>
+                    Top 5 Creativos Arizon
+                </h3>
+                <span class="text-[10px] font-mono bg-cyber-green text-black px-2 py-1 font-bold rounded uppercase">Orden: Inversión</span>
+            </div>
+            <table class="w-full text-sm font-mono text-left">
+                <thead class="bg-gray-100 text-[10px] uppercase border-b-2 border-cyber-black text-cyber-subtext">
+                    <tr>
+                        <th class="p-4">Nombre del Anuncio</th>
+                        <th class="p-4 text-right">Inversión</th>
+                        <th class="p-4 text-right">Resultados</th>
+                        <th class="p-4 text-right">CTR</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    <tr class="hover:bg-green-50/50 transition-colors">
+                        <td class="p-4 font-bold border-r border-gray-100 text-cyber-black">Humberto El Redmi Note 15</td>
+                        <td class="p-4 text-right border-r border-gray-100 font-bold">$332.99</td>
+                        <td class="p-4 text-right border-r border-gray-100 text-cyber-subtext">1,130</td>
+                        <td class="p-4 text-right text-cyber-green font-black">5.21%</td>
+                    </tr>
+                    <tr class="hover:bg-green-50/50 transition-colors">
+                        <td class="p-4 font-bold border-r border-gray-100 text-cyber-black">Reel Redmi Note 15 Pro 5G</td>
+                        <td class="p-4 text-right border-r border-gray-100 font-bold">$224.30</td>
+                        <td class="p-4 text-right border-r border-gray-100 text-cyber-subtext">785</td>
+                        <td class="p-4 text-right text-cyber-green font-black">4.88%</td>
+                    </tr>
+                    <tr class="hover:bg-green-50/50 transition-colors">
+                        <td class="p-4 font-bold border-r border-gray-100 text-cyber-black">Unboxing B Redmi Note 15 Pro</td>
+                        <td class="p-4 text-right border-r border-gray-100 font-bold">$133.00</td>
+                        <td class="p-4 text-right border-r border-gray-100 text-cyber-subtext">452</td>
+                        <td class="p-4 text-right text-cyber-green font-black">4.12%</td>
+                    </tr>
+                    <tr class="hover:bg-green-50/50 transition-colors">
+                        <td class="p-4 font-bold border-r border-gray-100 text-cyber-black">Lista 15/01 Arizon.ai</td>
+                        <td class="p-4 text-right border-r border-gray-100 font-bold">$107.14</td>
+                        <td class="p-4 text-right border-r border-gray-100 text-cyber-subtext">389</td>
+                        <td class="p-4 text-right text-cyber-blue font-black">6.05%</td>
+                    </tr>
+                    <tr class="hover:bg-green-50/50 transition-colors">
+                        <td class="p-4 font-bold border-r border-gray-100 text-cyber-black">Redmi Note 15 Pro</td>
+                        <td class="p-4 text-right border-r border-gray-100 font-bold">$100.21</td>
+                        <td class="p-4 text-right border-r border-gray-100 text-cyber-subtext">406</td>
+                        <td class="p-4 text-right text-cyber-green font-black">5.04%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-10 border-t-2 border-cyber-black mt-12 bg-white">
+        <p class="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-cyber-subtext">
+            System Generated by Arizon.ai • Technical Data Analysis
+        </p>
+    </footer>
+
+</body>
+</html>

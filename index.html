@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arizon.ai | Análisis Comparativo de Estrategias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        border: '#000',
+                        input: '#000',
+                        ring: '#000',
+                        background: '#fff',
+                        foreground: '#000',
+                        primary: { DEFAULT: '#000', foreground: '#fff' },
+                        secondary: { DEFAULT: '#fff', foreground: '#000' },
+                        muted: { DEFAULT: '#fff', foreground: '#000' },
+                        accent: { DEFAULT: '#fff', foreground: '#000' }
+                    },
+                    borderRadius: { lg: '0', md: '0', sm: '0' }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #000;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #fff;
+            color: #000;
+            border: 1px solid #000;
+        }
+
+        .badge-dark {
+            background: #000;
+            color: #fff;
+            border: 1px solid #000;
+        }
+
+        .badge-outline {
+            border: 1px solid #000;
+            background: transparent;
+            color: #000;
+        }
+
+        .loader {
+            border: 2px solid #fff;
+            border-top: 2px solid #000;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .drop-zone {
+            border: 2px dashed #000;
+            transition: all 0.15s ease;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #000;
+            background: #fff;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            border: 1px solid #000;
+            background: #fff;
+        }
+
+        .separator {
+            height: 1px;
+            background: #000;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+
+<body class="bg-white min-h-screen p-6 md:p-10">
+
+    <!-- Header -->
+    <header class="max-w-6xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-black text-white flex items-center justify-center font-bold text-2xl">A</div>
+            <div>
+                <h1 class="text-2xl font-bold text-black">Arizon.ai</h1>
+                <p class="text-sm text-black">Análisis Comparativo de Estrategias</p>
+            </div>
+        </div>
+        <div class="bg-black text-white px-4 py-2 text-sm font-semibold">
+            Fecha Pivot: 15 Enero 2026
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Upload -->
+        <div id="uploadSection" class="card p-8">
+            <div id="dropZone" class="drop-zone p-12 text-center cursor-pointer">
+                <svg class="mx-auto w-12 h-12 text-black mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <h2 class="text-xl font-bold text-black mb-2">Carga tu archivo CSV</h2>
+                <p class="text-black mb-4 text-sm">Compararemos: Antes vs Arizon</p>
+                <input type="file" id="fileInput" accept=".csv" class="hidden">
+                <button onclick="document.getElementById('fileInput').click()"
+                    class="bg-black text-white px-6 py-3 font-semibold hover:opacity-80 transition">
+                    Seleccionar CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingSection" class="hidden text-center py-12">
+            <div class="loader mx-auto mb-4"></div>
+            <p class="text-black font-medium">Analizando datos...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="hidden space-y-6">
+
+            <!-- Executive Summary -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-black"></div>
+                    <h2 class="text-lg font-semibold text-black">Resumen Ejecutivo</h2>
+                </div>
+                <div id="executiveSummary"></div>
+            </div>
+
+            <!-- Auditoría de Presupuesto -->
+            <div class="card p-6 border-2 border-black">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <span class="text-xs bg-black text-white px-2 py-1 font-semibold">AUDITORÍA DE
+                            PRESUPUESTO</span>
+                        <h2 class="text-3xl font-black mt-2 text-black">ANÁLISIS DE EFICIENCIA</h2>
+                        <p class="text-sm text-black mt-2">Del presupuesto de <strong>$2,000</strong>, $1,319 fueron
+                            consumidos en la fase pre-gestión. Arizon operó con el remanente.</p>
+                    </div>
+                    <div class="bg-black p-4 text-right text-white">
+                        <p class="text-xs">GASTO NETO Arizon</p>
+                        <p class="text-4xl font-black">$1,239<span class="text-lg">.01</span></p>
+                        <p class="text-xs mt-2">DISPONIBLE: $1,100</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="border border-black p-4">
+                        <p class="text-xs text-black uppercase font-semibold">Total Plataforma</p>
+                        <p class="text-3xl font-bold text-black mt-1">$3,008</p>
+                        <p class="text-xs text-black">PAGADO + DEUDA</p>
+                    </div>
+                    <div class="border border-black p-4">
+                        <p class="text-xs bg-black text-white px-2 py-0.5 inline-block font-semibold">EXCLUSIÓN 1</p>
+                        <p class="text-3xl font-bold text-black mt-1">-$1,319</p>
+                        <ul class="text-xs text-black mt-2 space-y-1">
+                            <li>• Deuda Heredada ($900)</li>
+                            <li>• Pagos 1-2 Ene ($419)</li>
+                        </ul>
+                    </div>
+                    <div class="border border-black p-4">
+                        <p class="text-xs bg-black text-white px-2 py-0.5 inline-block font-semibold">EXCLUSIÓN 2</p>
+                        <p class="text-3xl font-bold text-black mt-1">-$450</p>
+                        <ul class="text-xs text-black mt-2 space-y-1">
+                            <li>• Xiaomi ($100)</li>
+                            <li>• Lifephone ($100)</li>
+                            <li>• Mix ($250)</li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-black p-4">
+                        <p class="text-xs bg-black text-white px-2 py-0.5 inline-block font-semibold">NETO</p>
+                        <p class="text-3xl font-bold text-black mt-1">$1,239</p>
+                        <p class="text-xs text-black mt-2 font-semibold">Inversión Neta Real</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Comparison -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="badge">Antes</span>
+                        <span class="text-sm text-muted-foreground">Dic - 14 Ene</span>
+                    </div>
+                    <h3 class="text-base font-semibold text-foreground mb-1">Estrategia Anterior</h3>
+                    <p class="text-sm text-muted-foreground mb-4">Vistas e interacciones</p>
+                    <div id="phase1Stats" class="space-y-3"></div>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="badge badge-dark">Arizon</span>
+                        <span class="text-sm text-muted-foreground font-medium">15 Ene+</span>
+                    </div>
+                    <h3 class="text-base font-semibold text-foreground mb-1">Estrategia Arizon</h3>
+                    <p class="text-sm text-muted-foreground mb-4">Conversaciones iniciadas</p>
+                    <div id="phase2Stats" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Metrics Table -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Comparación de Métricas</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-black text-white text-xs uppercase">
+                            <tr>
+                                <th class="p-3 text-left font-semibold">Métrica</th>
+                                <th class="p-3 text-center font-semibold">Antes</th>
+                                <th class="p-3 text-center font-semibold">Arizon</th>
+                                <th class="p-3 text-center font-semibold">Benchmark</th>
+                                <th class="p-3 text-center font-semibold">Cambio</th>
+                                <th class="p-3 text-center font-semibold">Mejor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTable" class="divide-y divide-black"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Comparative Strengths Analysis -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-primary"></div>
+                    <h3 class="text-base font-semibold text-foreground">Análisis Profundo: Fortalezas Comparativas</h3>
+                </div>
+                <p class="text-sm text-muted-foreground mb-4">Qué hacía mejor cada período basado en datos crudos del
+                    CSV</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="rounded-lg border p-4">
+                        <h4 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <span class="badge">Antes</span>
+                        </h4>
+                        <div id="beforeStrengths" class="space-y-2 text-sm"></div>
+                    </div>
+                    <div class="rounded-lg border p-4">
+                        <h4 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <span class="badge badge-dark">Arizon</span>
+                        </h4>
+                        <div id="arizonStrengths" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+                <div class="separator"></div>
+                <h4 class="font-medium text-foreground mb-3">Patrones Ocultos</h4>
+                <div id="hiddenPatterns" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm"></div>
+            </div>
+
+            <!-- Result Types -->
+            <div class="card p-6">
+                <h3 class="text-base font-semibold text-foreground mb-4">Tipo de Resultado</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b">
+                            <span class="badge">Antes</span>
+                        </div>
+                        <div id="resultTypesBefore" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b">
+                            <span class="badge badge-dark">Arizon</span>
+                        </div>
+                        <div id="resultTypesAfter" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audience Insights -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Insights de Audiencia</h3>
+                <div id="audienceInsights"></div>
+            </div>
+
+            <!-- Top Ads -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold text-black mb-4">Top Anuncios (Antes)</h3>
+                    <div id="topAdsBefore" class="space-y-2"></div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-black mb-4">Top Anuncios (Arizon)</h3>
+                    <div id="topAdsAfter" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Keywords -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Palabras Clave</h3>
+                <div id="keywordAnalysis"></div>
+            </div>
+
+            <!-- Hidden Insights -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Insights Ocultos (Valor Añadido)</h3>
+                <div id="hiddenInsights"></div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Recomendaciones Estratégicas</h3>
+                <div id="recommendations"></div>
+            </div>
+
+            <!-- Strategic Conclusion NEW -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Conclusión Objetiva (PhD Marketing)</h3>
+                <div id="strategicConclusion"></div>
+            </div>
+
+            <!-- Chart -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-black mb-4">Gasto por Demografía</h3>
+                <div style="height: 400px;">
+                    <canvas id="demographicsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- DEEP ANALYSIS SECTIONS -->
+
+            <!-- Efficiency Matrix -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-black"></div>
+                    <h3 class="text-lg font-bold text-black">Matriz de Eficiencia Demográfica</h3>
+                </div>
+                <p class="text-sm text-black mb-4">Análisis de rendimiento por segmento para optimizar asignación de
+                    presupuesto</p>
+                <div id="efficiencyMatrix"></div>
+            </div>
+
+            <!-- Campaign Type Analysis -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-black"></div>
+                    <h3 class="text-lg font-bold text-black">Análisis por Tipo de Campaña</h3>
+                </div>
+                <p class="text-sm text-black mb-4">Comparación de efectividad entre tipos de resultado (Conversiones vs
+                    Interacciones vs Visitas)</p>
+                <div id="campaignTypeAnalysis"></div>
+            </div>
+
+            <!-- Creative Performance -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-black"></div>
+                    <h3 class="text-lg font-bold text-black">Rendimiento por Formato de Creativo</h3>
+                </div>
+                <p class="text-sm text-black mb-4">Análisis de formatos de anuncio (Reel, Carrusel, Lista, Publicación,
+                    Unboxing)</p>
+                <div id="creativePerformance"></div>
+            </div>
+
+            <!-- Benchmark Compliance -->
+            <div class="card p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-black"></div>
+                    <h3 class="text-lg font-bold text-black">Cumplimiento de Benchmarks Meta Ads 2025</h3>
+                </div>
+                <p class="text-sm text-black mb-4">Evaluación objetiva contra estándares de la industria
+                    (E-commerce/Electronics)</p>
+                <div id="benchmarkCompliance"></div>
+            </div>
+
+            <!-- Auto-Generated Insights -->
+            <div class="card p-6 border-2 border-black">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-black"></div>
+                    <h3 class="text-lg font-bold text-black">Insights Estratégicos Automatizados</h3>
+                </div>
+                <p class="text-sm text-black mb-4">Recomendaciones generadas automáticamente basadas en análisis de
+                    datos</p>
+                <div id="autoInsights"></div>
+            </div>
+
+            <!-- Executive Report (PhD Analysis) - FULL -->
+            <div class="card p-6 border-4 border-black">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 bg-black"></div>
+                        <h3 class="text-xl font-black text-black uppercase">Informe Ejecutivo PhD Marketing</h3>
+                    </div>
+                    <span class="text-xs border border-black px-2 py-1 bg-black text-white">ARIZON.AI
+                        INTELLIGENCE</span>
+                </div>
+
+                <!-- VEREDICTO -->
+                <div class="bg-black text-white p-6 mb-6">
+                    <h4 class="text-2xl font-black mb-2">VEREDICTO EJECUTIVO</h4>
+                    <p class="text-sm mb-4">ESTRATEGIA GANADORA: <span class="text-xl font-black">ARIZON</span></p>
+                    <p class="text-sm">La estrategia Arizon demuestra una eficiencia de conversión <strong>41.77x
+                            superior</strong>, reduciendo el costo por cliente potencial en un <strong>97.6%</strong>
+                        ($9.38 → $0.22). Esta optimización representa un cambio de paradigma: de métricas de vanidad a
+                        resultados comerciales reales.</p>
+                </div>
+
+                <!-- Métricas Clave -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                    <div class="border-2 border-black p-4 text-center">
+                        <p class="text-xs font-bold uppercase">Eficiencia Relativa</p>
+                        <p class="text-3xl font-black">41.77x</p>
+                        <p class="text-xs">más conversiones por $</p>
+                    </div>
+                    <div class="border-2 border-black p-4 text-center">
+                        <p class="text-xs font-bold uppercase">Reducción CPL</p>
+                        <p class="text-3xl font-black">97.6%</p>
+                        <p class="text-xs">$9.38 → $0.22</p>
+                    </div>
+                    <div class="border-2 border-black p-4 text-center">
+                        <p class="text-xs font-bold uppercase">Tasa Conversión</p>
+                        <p class="text-3xl font-black">120x</p>
+                        <p class="text-xs">0.10% → 12.22%</p>
+                    </div>
+                    <div class="border-2 border-black p-4 text-center">
+                        <p class="text-xs font-bold uppercase">Conversaciones</p>
+                        <p class="text-3xl font-black">36x</p>
+                        <p class="text-xs">252 → 9,186</p>
+                    </div>
+                </div>
+
+                <!-- Tabla Comparativa -->
+                <div class="mb-6">
+                    <h5 class="font-black text-sm mb-3 uppercase">Análisis Comparativo de Métricas (Las que Importan)
+                    </h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse border-2 border-black">
+                            <thead class="bg-black text-white">
+                                <tr>
+                                    <th class="p-2 text-left">Métrica</th>
+                                    <th class="p-2 text-center">Antes</th>
+                                    <th class="p-2 text-center">Arizon</th>
+                                    <th class="p-2 text-center">Ganador</th>
+                                    <th class="p-2 text-center">Impacto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-black">
+                                    <td class="p-2 font-bold">Costo por Conversación</td>
+                                    <td class="p-2 text-center">$9.38</td>
+                                    <td class="p-2 text-center font-bold">$0.22</td>
+                                    <td class="p-2 text-center bg-black text-white">ARIZON</td>
+                                    <td class="p-2 text-center">97.6% menor</td>
+                                </tr>
+                                <tr class="border-b border-black">
+                                    <td class="p-2 font-bold">Tasa de Conversión</td>
+                                    <td class="p-2 text-center">0.10%</td>
+                                    <td class="p-2 text-center font-bold">12.22%</td>
+                                    <td class="p-2 text-center bg-black text-white">ARIZON</td>
+                                    <td class="p-2 text-center">120x mayor</td>
+                                </tr>
+                                <tr class="border-b border-black">
+                                    <td class="p-2 font-bold">Conversaciones Totales</td>
+                                    <td class="p-2 text-center">252</td>
+                                    <td class="p-2 text-center font-bold">9,186</td>
+                                    <td class="p-2 text-center bg-black text-white">ARIZON</td>
+                                    <td class="p-2 text-center">36x más</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2 font-bold">Eficiencia por $100</td>
+                                    <td class="p-2 text-center">10.7 conv</td>
+                                    <td class="p-2 text-center font-bold">445.3 conv</td>
+                                    <td class="p-2 text-center bg-black text-white">ARIZON</td>
+                                    <td class="p-2 text-center">41.7x mejor</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Interpretación PhD -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="border-2 border-black p-4">
+                        <h5 class="font-black text-sm mb-2 uppercase">1. Paradigma "Alcance Barato" (Antes)</h5>
+                        <p class="text-xs mb-2">Optimizaba para <strong>métricas de vanidad</strong>:</p>
+                        <ul class="text-xs space-y-1">
+                            <li>• 973,463 interacciones/vistas</li>
+                            <li>• Solo 252 conversiones (0.026% conversión real)</li>
+                            <li>• Equivale a pagar por personas que miran la vitrina pero nunca entran</li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-black p-4 bg-black text-white">
+                        <h5 class="font-black text-sm mb-2 uppercase">2. Paradigma "Conversión Directa" (Arizon)</h5>
+                        <p class="text-xs mb-2">Optimizaba para <strong>resultados comerciales</strong>:</p>
+                        <ul class="text-xs space-y-1">
+                            <li>• 9,186 conversaciones iniciadas</li>
+                            <li>• 94.6% del presupuesto en campañas de mensajes</li>
+                            <li>• Cada $1 invertido genera 4.45 clientes potenciales</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Análisis Costo-Beneficio -->
+                <div class="border-2 border-black p-4 mb-6">
+                    <h5 class="font-black text-sm mb-3 uppercase">Análisis de Costo-Beneficio con $2,000</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center p-3 border border-black">
+                            <p class="text-xs font-bold">Estrategia ANTES</p>
+                            <p class="text-2xl font-black">~213</p>
+                            <p class="text-xs">conversaciones ($9.38/conv)</p>
+                        </div>
+                        <div class="text-center p-3 bg-black text-white">
+                            <p class="text-xs font-bold">Estrategia ARIZON</p>
+                            <p class="text-2xl font-black">~8,906</p>
+                            <p class="text-xs">conversaciones ($0.22/conv)</p>
+                        </div>
+                        <div class="text-center p-3 border-2 border-black">
+                            <p class="text-xs font-bold">DIFERENCIA</p>
+                            <p class="text-2xl font-black text-black">+8,693</p>
+                            <p class="text-xs">clientes adicionales por el mismo $</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segmentación Recomendada -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="border-2 border-black p-4">
+                        <h5 class="font-black text-sm mb-2 uppercase bg-black text-white p-2 -m-4 mb-3">Audiencias de
+                            Alto Rendimiento (ESCALAR)</h5>
+                        <table class="w-full text-xs">
+                            <tr class="border-b">
+                                <td class="py-1">Hombres 55-64</td>
+                                <td class="text-right font-bold">$0.18/conv</td>
+                                <td class="text-right">+50%</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-1">Hombres 45-54</td>
+                                <td class="text-right font-bold">$0.19/conv</td>
+                                <td class="text-right">+50%</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1">Hombres 65+</td>
+                                <td class="text-right font-bold">$0.20/conv</td>
+                                <td class="text-right">+30%</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="border-2 border-black p-4">
+                        <h5 class="font-black text-sm mb-2 uppercase border-2 border-black p-2 -m-4 mb-3">Audiencias a
+                            Optimizar (REDUCIR)</h5>
+                        <table class="w-full text-xs">
+                            <tr class="border-b">
+                                <td class="py-1">Mujeres 18-24</td>
+                                <td class="text-right">$0.29/conv</td>
+                                <td class="text-right">Nuevos creativos</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-1">Mujeres 25-34</td>
+                                <td class="text-right">$0.28/conv</td>
+                                <td class="text-right">A/B testing</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1">Hombres 25-34</td>
+                                <td class="text-right">$0.27/conv</td>
+                                <td class="text-right">Segmentar</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Plan de Acción -->
+                <div class="border-2 border-black p-4 mb-6">
+                    <h5 class="font-black text-sm mb-3 uppercase">Plan de Acción Inmediato</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <p class="font-bold mb-2">SEMANA 1-2:</p>
+                            <ul class="space-y-1">
+                                <li>□ Escalar presupuesto en segmento Hombres 45-64</li>
+                                <li>□ Producir más Reels (formato más efectivo)</li>
+                                <li>□ Eliminar campañas de interacción/vistas</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-2">SEMANA 3-4:</p>
+                            <ul class="space-y-1">
+                                <li>□ A/B test creativos para segmento 25-34</li>
+                                <li>□ Expandir audiencias para reducir frecuencia</li>
+                                <li>□ Retargeting a conversaciones no cerradas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conclusión Final -->
+                <div class="bg-black text-white p-6">
+                    <h5 class="font-black text-lg mb-3">CONCLUSIÓN FINAL</h5>
+                    <p class="text-sm mb-4">La estrategia <strong>Arizon</strong> representa la evolución de "pagar por
+                        ser visto" a "pagar por resultados". En un mercado de electrónicos donde cada lead cuenta,
+                        invertir <strong>$0.22 por conversación</strong> vs. <strong>$9.38</strong> no es una
+                        optimización—es una <strong>transformación del modelo</strong>.</p>
+                    <p class="text-lg font-black">LA DECISIÓN ES CLARA: ARIZON ES LA ESTRATEGIA GANADORA.</p>
+                    <p class="text-xs mt-4 opacity-70">Informe generado por Arizon.ai Intelligence Unit | Metodología:
+                        Análisis de datos CSV de Meta Ads + Benchmarks de industria 2024-2025</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="text-center py-8 mt-8">
+        <p class="text-xs text-black">Arizon.ai • Marketing Intelligence</p>
+    </footer>
+
+    <script src="analyzer-comparative.js"></script>
+</body>
+
+</html>
